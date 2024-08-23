@@ -28,6 +28,7 @@ import NWView from '../primitives/NWView';
 
 async function login(
   navigator: ScreenNavigator,
+
   authentication: AuthenticationContext,
   creds: Credentials,
 ): Promise<void> {
@@ -112,7 +113,7 @@ function LoginForm(): JSX.Element {
   );
 }
 
-export default function Login(props: ScreenProps): JSX.Element {
+export default function Login(props: ScreenProps): React.JSX.Element {
   return (
     <NWSafeAreaView>
       <NWScrollView>

@@ -7,16 +7,14 @@
 
 import React from 'react';
 
-import {
-    Text
-} from 'react-native';
+import {Text} from 'react-native';
 import Link from './Link';
 import Config from './Config';
 
 export default function PrivacyPolicy(): JSX.Element {
-    return (
-        <Link to={Config.privacyPolicy}>
-            <Text>Privacy Policy</Text>
-        </Link>
-    )
+  return (
+    <Link to={Config.privacyPolicy}>
+      <Text>Privacy Policy</Text>
+    </Link>
+  );
 }

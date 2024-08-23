@@ -3,104 +3,100 @@
  */
 
 import React from 'react';
-import {
-    Switch,
-} from 'react-native';
+import {Switch} from 'react-native';
 
 import NavigatorTerms from '../constants/NavigatorTerms';
-import { NavigatorContext, ScreenNavigator } from '../contexts/Navigation';
+import {NavigatorContext, ScreenNavigator} from '../contexts/Navigation';
 import TopBar from '../components/TopBar';
 import NWView from '../primitives/NWView';
 import NWText from '../primitives/NWText';
 import NWTouchableHighlight from '../primitives/NWTouchableHighlight';
-import { AuthenticationContext } from '../contexts/Authentication';
+import {AuthenticationContext} from '../contexts/Authentication';
 
 interface ChangeProfileRequest {
-    username?: string,
-    password?: string,
-    duo?: string,
+  username?: string;
+  password?: string;
+  duo?: string;
 }
 
 function changeProfileRequest(
-    navigator: ScreenNavigator,
-    { username, password, duo }: ChangeProfileRequest
+  navigator: ScreenNavigator,
+  {username, password, duo}: ChangeProfileRequest,
 ): void {
-    navigator.navigate(NavigatorTerms.HOME);
+  navigator.navigate(NavigatorTerms.HOME);
 }
 
 function changePhoto(photo: string): void {
-    /** TODO **/
+  /** TODO **/
 }
 
 interface Setting {
-    name: string,
-    currentVal: boolean,
+  name: string;
+  currentVal: boolean;
 }
 
 const settings: Array<Setting> = [
-    {
-        name: "Dark Mode",
-        currentVal: true,
-    },
-    {
-        name: "Use Local NLP",
-        currentVal: true,
-    },
-    {
-        name: "Use Local Storage",
-        currentVal: true,
-    },
-    {
-        name: "Animations",
-        currentVal: true,
-    }
-]
+  {
+    name: 'Dark Mode',
+    currentVal: true,
+  },
+  {
+    name: 'Use Local NLP',
+    currentVal: true,
+  },
+  {
+    name: 'Use Local Storage',
+    currentVal: true,
+  },
+  {
+    name: 'Animations',
+    currentVal: true,
+  },
+];
 
-async function signOut(auth: AuthenticationContext, navigator: ScreenNavigator): Promise<void> {
-    await auth.signOut();
-    navigator.navigate(NavigatorTerms.LOGIN);
+async function signOut(
+  auth: AuthenticationContext,
+  navigator: ScreenNavigator,
+): Promise<void> {
+  await auth.signOut();
+  navigator.navigate(NavigatorTerms.LOGIN);
 }
 
 export default function Settings(): JSX.Element {
-    const navigator = React.useContext(NavigatorContext);
-    const auth = React.useContext(AuthenticationContext);
+  const navigator = React.useContext(NavigatorContext);
+  const auth = React.useContext(AuthenticationContext);
 
-    return (
-        <>
-            <TopBar onButtonPress={() => navigator.openDrawer()} />
-            {settings.map(({ name, currentVal }, index) =>
-                <NWView className=" flex-0 flex-col items-begin justify-around py-1 " key={index}>
-                    <NWView className=" flex-0 flex-row justify-between w-screen ">
-                        <NWText className=" color-[#000000FF] ">{name}</NWText>
-                        <Switch onValueChange={() => { }} value={currentVal} />
-                    </NWView>
-
-                </NWView>
-            )}
-            <NWView className=" pt-2 ">
-                <NWTouchableHighlight
-                    className=' flex-0 items-center justify-center bg-[#C678A6] py-1 rounded-lg '
-                    onPress={() => signOut(auth, navigator)}
-                >
-                    <NWText
-                        className=' text-[#FFFFFFFF] font-medium text-lg '
-                    >
-                        Logout
-                    </NWText>
-                </NWTouchableHighlight>
-            </NWView>
-            <NWView className=" pt-2 ">
-                <NWTouchableHighlight
-                    className=' flex-0 items-center justify-center bg-[#C678A6] py-1 rounded-lg '
-                    onPress={() => signOut(auth, navigator)}
-                >
-                    <NWText
-                        className=' text-[#FFFFFFFF] font-medium text-lg '
-                    >
-                        Delete Account
-                    </NWText>
-                </NWTouchableHighlight>
-            </NWView>
-        </>
-    );
+  return (
+    <>
+      <TopBar onButtonPress={() => navigator.openDrawer()} />
+      {settings.map(({name, currentVal}, index) => (
+        <NWView
+          className=" flex-0 flex-col items-begin justify-around py-1 "
+          key={index}>
+          <NWView className=" flex-0 flex-row justify-between w-screen ">
+            <NWText className=" color-[#000000FF] ">{name}</NWText>
+            <Switch onValueChange={() => {}} value={currentVal} />
+          </NWView>
+        </NWView>
+      ))}
+      <NWView className=" pt-2 ">
+        <NWTouchableHighlight
+          className=" flex-0 items-center justify-center bg-[#C678A6] py-1 rounded-lg "
+          onPress={() => signOut(auth, navigator)}>
+          <NWText className=" text-[#FFFFFFFF] font-medium text-lg ">
+            Logout
+          </NWText>
+        </NWTouchableHighlight>
+      </NWView>
+      <NWView className=" pt-2 ">
+        <NWTouchableHighlight
+          className=" flex-0 items-center justify-center bg-[#C678A6] py-1 rounded-lg "
+          onPress={() => signOut(auth, navigator)}>
+          <NWText className=" text-[#FFFFFFFF] font-medium text-lg ">
+            Delete Account
+          </NWText>
+        </NWTouchableHighlight>
+      </NWView>
+    </>
+  );
 }

@@ -7,16 +7,14 @@
 
 import React from 'react';
 
-import {
-    Text
-} from 'react-native';
+import {Text} from 'react-native';
 import Link from './Link';
 import Config from './Config';
 
 export default function Terms(): JSX.Element {
-    return (
-        <Link to={Config.termsOfService}>
-            <Text>Term of Service</Text>
-        </Link>
-    )
+  return (
+    <Link to={Config.termsOfService}>
+      <Text>Term of Service</Text>
+    </Link>
+  );
 }
