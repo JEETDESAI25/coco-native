@@ -7,5 +7,6 @@ module.exports = {
   plugins: ['prettier'],
   rules: {
     'prettier/prettier': 'error', // Shows Prettier errors as ESLint errors
+    'react-native/no-inline-styles': 0,
   },
 };
