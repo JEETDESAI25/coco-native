@@ -3,13 +3,15 @@
  */
 
 import React from 'react';
-import {SafeAreaView, ScrollView, StatusBar} from 'react-native';
 import {PieChart} from 'react-native-svg-charts';
 import {NavigatorContext} from '../contexts/Navigation';
 import TopBar from '../components/TopBar';
 import SincePicker, {SinceOption} from '../components/SincePicker';
 import NWView from '../primitives/NWView';
 import NWText from '../primitives/NWText';
+import NWSafeAreaView from '../primitives/NWSafeAreaView';
+import NWStatusBar from '../primitives/NWStatusBar';
+import {ScrollView} from 'react-native';
 
 interface TrendStat {
   title: string;
@@ -80,7 +82,6 @@ function TrendsPieChart(): JSX.Element {
 
 export default function Trends(): JSX.Element {
   const navigator = React.useContext(NavigatorContext);
-
   const [sinceOption, updateSinceOption] = React.useState(SinceOption.Today);
 
   const totalCalories = 100;
@@ -101,39 +102,45 @@ export default function Trends(): JSX.Element {
     totalProtein,
   );
 
+  const randomColor = () =>
+    ('#' + ((Math.random() * 0xffffff) << 0).toString(16) + '000000').slice(
+      0,
+      7,
+    );
+
   return (
-    <SafeAreaView>
-      <StatusBar />
-      <TopBar onButtonPress={() => navigator.openDrawer()} />
-      <NWView className=" flex-0 flex-col h-[88%] px-1 ">
-        <SincePicker
-          currentSinceOption={sinceOption}
-          updateSinceOption={updateSinceOption}
-        />
-        <NWView className=" flex-0 flex-col pt-16 ">
-          <ScrollView contentInsetAdjustmentBehavior="automatic">
-            <TrendsPieChart />
-            <NWView className="pb-5">
-              <NWText className=" text-xl ">Macros</NWText>
-              <TrendTotals totals={macrosTotals} />
-            </NWView>
-            <NWView className="pb-5">
-              <NWText className=" text-xl ">Daily</NWText>
-              <TrendTotals totals={dailyTotals} />
-            </NWView>
-            <NWView className="pb-5">
-              <NWText className=" text-xl ">Healthy Habits</NWText>
-              {habits.map((habit, index) => (
-                <NWText
-                  className=" mb-2 p-1 bg-[#A62A72BB] text-m color-[#000000FF] "
-                  key={index}>
-                  {habit}
-                </NWText>
-              ))}
-            </NWView>
-          </ScrollView>
+    <NWSafeAreaView className="flex-1">
+      <NWStatusBar />
+      <TopBar onButtonPress={() => navigator?.openDrawer()} />
+      <ScrollView contentInsetAdjustmentBehavior="automatic">
+        <NWView className="px-4">
+          <SincePicker
+            currentSinceOption={sinceOption}
+            updateSinceOption={updateSinceOption}
+          />
+          <NWText className="text-xl color-[#000000FF] pb-5">
+            Macronutrients
+          </NWText>
+          <TrendsPieChart />
+          <TrendTotals totals={macrosTotals} className="mt-4" />
+          <NWText className="text-xl color-[#000000FF] pt-10 pb-5">
+            Daily Totals
+          </NWText>
+          <TrendTotals totals={dailyTotals} className="mb-4" />
+          <NWText className="text-xl color-[#000000FF] pt-10 pb-5">
+            Habits
+          </NWText>
+          <NWView>
+            {habits.map((habit, index) => (
+              <NWText
+                className="mb-2 p-1 bg-[#A62A72BB] text-m color-[#000000FF]"
+                key={index}>
+                {habit}
+              </NWText>
+            ))}
+          </NWView>
         </NWView>
-      </NWView>
-    </SafeAreaView>
+      </ScrollView>
+    </NWSafeAreaView>
   );
 }

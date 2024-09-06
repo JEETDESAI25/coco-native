@@ -3,7 +3,7 @@
  */
 
 import {styled} from 'nativewind';
-import Modal from 'react-native-modal';
+import Modal, {ModalProps} from 'react-native-modal';
 
-const NWModal = styled(Modal);
+const NWModal = styled<ModalProps>(Modal);
 export default NWModal;

@@ -2,15 +2,16 @@
  * Timeline for past nutrients and foods chosen before.
  */
 
+import NWSafeAreaView from '../primitives/NWSafeAreaView';
 import React from 'react';
-import {FlatList, SafeAreaView, StatusBar} from 'react-native';
-
+import {FlatList} from 'react-native';
 import {NavigatorContext} from '../contexts/Navigation';
 import TopBar from '../components/TopBar';
 import SincePicker, {SinceOption} from '../components/SincePicker';
 import NWView from '../primitives/NWView';
 import NWImage from '../primitives/NWImage';
 import NWText from '../primitives/NWText';
+import NWStatusBar from '../primitives/NWStatusBar';
 
 interface TimelineMeal {
   id: number;
@@ -121,34 +122,28 @@ const meals: TimelineMeal[] = [
 
 export default function Timeline(): JSX.Element {
   const navigator = React.useContext(NavigatorContext);
-
   const [sinceOption, updateSinceOption] = React.useState(SinceOption.Today);
 
   return (
-    <SafeAreaView>
-      <StatusBar />
-      <TopBar onButtonPress={() => navigator.openDrawer()} />
-      <NWView className=" flex-0 flex-col h-[88%] px-1 ">
+    <NWSafeAreaView className="flex-1">
+      <NWStatusBar />
+      <TopBar onButtonPress={() => navigator?.openDrawer()} />
+      <NWView className="flex-1 px-1">
         <FlatList
           contentContainerStyle={{
-            flex: 0,
-            flexDirection: 'column',
+            flexGrow: 1,
           }}
           inverted={true}
           data={meals}
-          keyExtractor={(item, index) => String(item.id)}
+          keyExtractor={item => String(item.id)}
           renderItem={({item}: {item: TimelineMeal}) => (
-            <NWView className=" flex-0 flex-row justify-between bg-[#A62A72BB] mt-4 ml-8 py-2 ">
-              <NWImage
-                className=" ml-4 "
-                width={50}
-                source={{uri: item.image}}
-              />
-              <NWView className=" ml-4 flex-1 flex-col py-2 ">
+            <NWView className="flex-row justify-between bg-[#A62A72BB] mt-4 ml-8 py-2">
+              <NWImage className="ml-4" width={50} source={{uri: item.image}} />
+              <NWView className="ml-4 flex-1 flex-col py-2">
                 <NWText>{item.mealType}</NWText>
                 <NWText>{item.calories + ' Calories'}</NWText>
               </NWView>
-              <NWView className=" flex-1 flex-col py-2 ">
+              <NWView className="flex-1 flex-col py-2">
                 <NWText>{item.mealTime.toUTCString()}</NWText>
               </NWView>
             </NWView>
@@ -159,6 +154,6 @@ export default function Timeline(): JSX.Element {
           updateSinceOption={updateSinceOption}
         />
       </NWView>
-    </SafeAreaView>
+    </NWSafeAreaView>
   );
 }

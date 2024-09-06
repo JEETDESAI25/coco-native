@@ -2,13 +2,15 @@
  * Page for discovering diets and tips on how to better your nutrition
  */
 
+import NWSafeAreaView from '../primitives/NWSafeAreaView';
 import React from 'react';
-import {SafeAreaView, ScrollView, StatusBar} from 'react-native';
+import {ScrollView} from 'react-native';
 import {NavigatorContext} from '../contexts/Navigation';
 import TopBar from '../components/TopBar';
 import Link from '../components/Link';
 import NWView from '../primitives/NWView';
 import NWText from '../primitives/NWText';
+import NWStatusBar from '../primitives/NWStatusBar';
 
 interface Headline {
   title: string;
@@ -60,38 +62,36 @@ export default function Discover(): JSX.Element {
   const navigator = React.useContext(NavigatorContext);
 
   return (
-    <SafeAreaView>
-      <StatusBar />
+    <NWSafeAreaView className="flex-1">
+      <NWStatusBar />
       <TopBar onButtonPress={() => navigator?.openDrawer()} />
-      <NWView className="h-[88%]">
-        <ScrollView contentInsetAdjustmentBehavior="automatic">
-          <NWText className=" text-xl color-[#000000FF] pb-5 ">
-            Headlines
-          </NWText>
+      <ScrollView contentInsetAdjustmentBehavior="automatic">
+        <NWView className="px-4">
+          <NWText className="text-xl color-[#000000FF] pb-5">Headlines</NWText>
           {headlines.map(({title, link}, index) => (
-            <NWView className=" pb-5 " key={index}>
-              <NWView className=" bg-[#C678A699] p-3 ">
+            <NWView className="pb-5" key={index}>
+              <NWView className="bg-[#C678A699] p-3">
                 <Link className="" to={link}>
-                  <NWText className=" color-[#000000FF] ">{title}</NWText>
+                  <NWText className="color-[#000000FF]">{title}</NWText>
                 </Link>
               </NWView>
             </NWView>
           ))}
 
-          <NWText className=" text-xl color-[#000000FF] pt-10 pb-5 ">
+          <NWText className="text-xl color-[#000000FF] pt-10 pb-5">
             Diets
           </NWText>
-          <NWView className=" pl-5 flex-1 flex-col flex-wrap max-h-[200px] ">
+          <NWView className="flex-row flex-wrap">
             {diets.map(({title}, index) => (
-              <NWView className=" pb-5 pr-2 " key={index}>
-                <NWView className=" bg-[#C678A699] p-3 ">
-                  <NWText className=" color-[#000000FF] ">{title}</NWText>
+              <NWView className="pb-5 pr-2 w-1/2" key={index}>
+                <NWView className="bg-[#C678A699] p-3">
+                  <NWText className="color-[#000000FF]">{title}</NWText>
                 </NWView>
               </NWView>
             ))}
           </NWView>
-        </ScrollView>
-      </NWView>
-    </SafeAreaView>
+        </NWView>
+      </ScrollView>
+    </NWSafeAreaView>
   );
 }
