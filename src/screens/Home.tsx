@@ -16,17 +16,16 @@ export default function Home(): JSX.Element {
   const navigator = React.useContext(NavigatorContext);
 
   return (
-    <NWSafeAreaView>
+    <NWSafeAreaView className="flex-1">
       <NWStatusBar />
       <TopBar onButtonPress={() => navigator?.openDrawer()} />
-      <NWView className=" items-center align-begin ">
-        <NWText className=" mt-10 text-3xl text-[#A62A72FF] "> Welcome</NWText>
-        <NWText className=" text-3xl text-[#A62A72FF] ">
-          Version {Config.versionNumber}{' '}
+      <NWView className="flex-1 justify-center items-center px-4">
+        <NWText className="text-3xl text-[#A62A72FF] mb-2">Welcome</NWText>
+        <NWText className="text-3xl text-[#A62A72FF] mb-4">
+          Version {Config.versionNumber}
         </NWText>
-        <NWText className=" text-xl text-[#C678A6] ">
-          {' '}
-          Find Nutritional Agency in your diet{' '}
+        <NWText className="text-xl text-[#C678A6] text-center">
+          Find Nutritional Agency in your diet
         </NWText>
       </NWView>
     </NWSafeAreaView>
