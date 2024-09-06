@@ -17,16 +17,16 @@ export interface TopBarProps {
 
 export default function TopBar({onButtonPress}: TopBarProps): JSX.Element {
   return (
-    <NWView className=" flex flex-row bg-[#000000] items-center ">
+    <NWView className="flex flex-row bg-[#A62A72FF] items-center">
       <NWTouchableHighlight
         className={
-          ' flex flex-col ml-4 mr-7 my-2 items-center justify-center ' +
-          ' border-[5px] border-[#FFFFFF] bg-[#FFFFFF] rounded-[100px] '
+          'flex flex-col ml-4 mr-7 my-2 items-center justify-center ' +
+          'border-[5px] border-[#FFFFFF] bg-[#FFFFFF] rounded-[100px]'
         }
         onPress={onButtonPress}>
         <MaterialIcon name="person" size={20} color="black" />
       </NWTouchableHighlight>
-      <NWText className=" text-2xl text-[#FFFFFF] ">{Config.appTitle}</NWText>
+      <NWText className="text-2xl text-[#FFFFFF]">{Config.appTitle}</NWText>
     </NWView>
   );
 }
