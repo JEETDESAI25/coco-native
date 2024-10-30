@@ -22,12 +22,14 @@ export interface User {
 export interface Credentials {
   email: string;
   password: string;
+  name: string;
 }
 
 function recordFromCreds(creds: Credentials): Record<string, string> {
   let result: Record<string, string> = {};
-  result['email'] = creds.email;
-  result['password'] = creds.password;
+  result.email = creds.email;
+  result.password = creds.password;
+  result.name = creds.name;
   return result;
 }
 
@@ -48,10 +50,10 @@ export interface AuthenticationContext extends AuthenticationState {
 export const AuthenticationContext = React.createContext({
   user: null,
   token: '',
-  signUp: async (args: Credentials) => error('unimplemented'),
-  signIn: async (args: Credentials) => error('unimplemented'),
+  signUp: async (_args: Credentials) => error('unimplemented'),
+  signIn: async (_args: Credentials) => error('unimplemented'),
   signOut: async () => false,
-  fetch: async (args: FetchArgs) => badResponse(),
+  fetch: async (_args: FetchArgs) => badResponse(),
 } as AuthenticationContext);
 
 async function signUp(
@@ -64,39 +66,45 @@ async function signUp(
     throw Error('cannot signup when signed in');
   }
 
-  const url = fromEndpointAndParams(
-    ApiEndpoint.register,
-    recordFromCreds(creds),
-  );
-
-  const netResult: FetchResponse = await netFetch(instance, network, update, {
-    resource: url.toString(),
-    options: {
-      method: 'POST',
-      cache: 'no-cache',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      redirect: 'follow',
-      referrerPolicy: 'no-referrer',
-    },
-  });
-
   try {
+    const netResult: FetchResponse = await netFetch(instance, network, update, {
+      resource: ApiEndpoint.register,
+      options: {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: creds.email,
+          password: creds.password,
+          name: creds.name,
+        }),
+        cache: 'no-cache',
+        redirect: 'follow',
+        referrerPolicy: 'no-referrer',
+      },
+    });
+
     if (!netResult.isOk) {
-      console.error('bad signup response');
-      return error('bad signup response');
+      if (netResult.status === 409) {
+        return error('An account with this email already exists');
+      }
+      if (netResult.data?.error) {
+        return error(netResult.data.error);
+      }
+      return error('Registration failed. Please try again.');
     }
 
     const payload = netResult.data;
     instance.token = payload?.jwt || '';
     instance.user = payload?.record || {};
     update(instance);
-  } catch (err) {
-    console.error(err);
-  }
 
-  return result({} as User);
+    return result(instance.user as User);
+  } catch (err) {
+    console.error('Signup error:', err);
+    return error(`Signup error: ${err.message}`);
+  }
 }
 
 async function signIn(
@@ -113,39 +121,47 @@ async function signIn(
     'base64',
   );
 
-  const netResult: FetchResponse = await netFetch(instance, network, update, {
-    resource: ApiEndpoint.login,
-    options: {
-      method: 'POST',
-      cache: 'no-cache',
-      headers: {
-        Authorization: 'Basic ' + auth,
-        'Content-Type': 'application/json',
-      },
-      redirect: 'follow',
-      referrerPolicy: 'no-referrer',
-    },
-  });
-
   try {
+    const netResult: FetchResponse = await netFetch(instance, network, update, {
+      resource: ApiEndpoint.login,
+      options: {
+        method: 'POST',
+        cache: 'no-cache',
+        headers: {
+          Authorization: 'Basic ' + auth,
+          'Content-Type': 'application/json',
+        },
+        redirect: 'follow',
+        referrerPolicy: 'no-referrer',
+      },
+    });
+
+    console.log('Sign-in response:', netResult); // Log the entire response
+
     if (!netResult.isOk) {
-      console.error('bad signin response');
-      return error('bad signin response');
+      console.error('Bad signin response:', netResult.status, netResult.data);
+      return error(`Bad signin response: ${netResult.status}`);
     }
 
     const payload = netResult.data;
-    instance.token = payload?.token || '';
+    if (!payload || typeof payload !== 'object') {
+      console.error('Invalid payload:', payload);
+      return error('Invalid response payload');
+    }
+
+    instance.token = payload.token || '';
     instance.user = {
-      userid: payload?.userid || '',
+      userid: payload.userid || '',
     };
     update(instance);
-  } catch (err) {
-    console.error(err);
-  }
 
-  return result({
-    userid: '',
-  } as User);
+    return result({
+      userid: instance.user.userid,
+    } as User);
+  } catch (err) {
+    console.error('Sign-in error:', err);
+    return error(`Sign-in error: ${err.message}`);
+  }
 }
 
 async function signOut(
@@ -175,9 +191,9 @@ async function netFetch(
 
   const defaultedOptions = args?.options || ({} as RequestInit);
   defaultedOptions.headers = defaultedOptions.headers || ({} as HeadersInit);
-  (defaultedOptions.headers as Record<string, string>)[
-    'Authorization'
-  ] = `Bearer ${instance.token}`;
+  (
+    defaultedOptions.headers as Record<string, string>
+  ).Authorization = `Bearer ${instance.token}`;
   return await network.fetch({
     resource: args.resource,
     options: defaultedOptions,
