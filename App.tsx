@@ -25,7 +25,7 @@ import Home from './src/screens/Home';
 import Login from './src/screens/Login';
 import Profile from './src/screens/Profile';
 import Settings from './src/screens/Settings';
-import SignUp from './src/screens/Signup';
+import SignUp from './src/screens/SignUp';
 import Timeline from './src/screens/Timeline';
 import Trends from './src/screens/Trends';
 
