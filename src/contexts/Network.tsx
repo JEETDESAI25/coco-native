@@ -28,17 +28,29 @@ export function badResponse(): FetchResponse {
 
 async function fromResponse(response: Response): Promise<FetchResponse> {
   try {
+    const contentType = response.headers.get('content-type');
+    let data;
+    if (contentType && contentType.includes('application/json')) {
+      data = await response.json();
+    } else {
+      data = await response.text();
+      console.warn('Non-JSON response:', data);
+    }
     return {
       isOk: response.ok,
       headers: response.headers,
       status: response.status,
-      data: await response.json(),
+      data,
     };
   } catch (e) {
-    console.warn(e);
+    console.warn('Error parsing response:', e);
+    return {
+      isOk: false,
+      headers: response.headers,
+      status: response.status,
+      data: {},
+    };
   }
-
-  return badResponse();
 }
 
 export type FetchSignature = (args: FetchArgs) => Promise<FetchResponse>;
@@ -50,11 +62,11 @@ export interface NetworkContext {
 
 export const NetworkContext = React.createContext({
   isProcessing: false,
-  fetch: async (args: FetchArgs) => badResponse(),
+  fetch: async (_args: FetchArgs) => badResponse(),
 });
 
 function needsMoreTime(resultRecord: Record<string, string>): boolean {
-  return resultRecord['msg'] === 'Still Processing';
+  return resultRecord.msg === 'Still Processing';
 }
 
 async function fetchLoop(args: FetchArgs): Promise<FetchResponse> {
@@ -69,11 +81,11 @@ async function fetchLoop(args: FetchArgs): Promise<FetchResponse> {
     }
 
     let resource = new URL(args.resource.toString());
-    resource.searchParams.append('task_id', response.data['task_id'] as string);
+    resource.searchParams.append('task_id', response.data.task_id as string);
     const finalResource = resource.toString();
 
     while (needsMoreTime(response.data)) {
-      await delay(response.data['sleep'] as number);
+      await delay(response.data.sleep as number);
       response = await fromResponse(await fetch(finalResource, defaultOptions));
       console.log('got', response.data);
     }
