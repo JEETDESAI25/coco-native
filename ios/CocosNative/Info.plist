@@ -26,6 +26,9 @@
 	<true/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
+	<!-- This key allows access to all HTTP servers and not just localhost  -->
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
 		<key>NSExceptionDomains</key>
 		<dict>
 			<key>localhost</key>
