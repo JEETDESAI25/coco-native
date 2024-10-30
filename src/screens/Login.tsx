@@ -2,10 +2,10 @@
  * Login For users to collect token and perform changes to their account
  */
 
-import React from 'react';
-
+import React, {useState} from 'react';
+import {Alert} from 'react-native';
 import {Formik} from 'formik';
-
+import {isError, getData} from '../types/result';
 import Logo from '../components/Logo';
 import ThirdPartyLogins from '../components/ThirdPartyLogins';
 import NavigatorTerms from '../constants/NavigatorTerms';
@@ -25,34 +25,50 @@ import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 
 async function login(
   navigator: ScreenNavigator,
-
   authentication: AuthenticationContext,
   creds: Credentials,
+  setError: (message: string) => void,
 ): Promise<void> {
-  navigator.navigate(NavigatorTerms.HOME);
+  try {
+    const result = await authentication.signIn(creds);
+    if (!isError(result)) {
+      const user = getData(result);
+      console.log('Login successful:', user);
+      navigator.navigate(NavigatorTerms.HOME);
+    } else {
+      console.error('Login failed:', result.error);
+      setError(result.error);
+      Alert.alert('Login Failed', result.error);
+    }
+  } catch (err) {
+    console.error('Login error:', err);
+    setError('An unexpected error occurred. Please try again.');
+    Alert.alert(
+      'Login Error',
+      'An unexpected error occurred. Please try again.',
+    );
+  }
 }
-//     try {
-//         const result = await authentication.signIn(creds);
-//         if (!isError(result)) {
-//             navigator.navigate(NavigatorTerms.HOME);
-//         }
-//     } catch (err) {
-//         console.warn(err);
-//     }
-// }
 
 function LoginForm(): JSX.Element {
   const navigator = React.useContext(NavigatorContext);
   const authentication = React.useContext(AuthenticationContext);
-  const [showPassword, setShowPassword] = React.useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   return (
     <NWView className="flex-0 flex-col items-center w-full px-8">
+      {error && (
+        <NWText className="text-red-600 font-bold text-lg text-center mb-4">
+          {error}
+        </NWText>
+      )}
       <Formik
         initialValues={{email: '', password: ''} as Credentials}
         onSubmit={values => {
+          setError(null); // Reset error before making a new request
           if (navigator) {
-            return login(navigator, authentication, values);
+            return login(navigator, authentication, values, setError);
           }
         }}>
         {({handleChange, handleBlur, handleSubmit, values}) => (
