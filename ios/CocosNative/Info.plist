@@ -76,5 +76,24 @@
   <string>Zocial.ttf</string>
   <string>Fontisto.ttf</string>
 </array>
+<!-- url scheme handling -->
+	<key>CFBundleURLTypes</key>
+	<array>
+	  <dict>
+	    <key>CFBundleURLSchemes</key>
+	    <array>
+	      <string>cocoapp</string>
+	    </array>
+	    <key>CFBundleURLName</key>
+	    <string>org.cocoapp</string>
+	  </dict>
+	</array>
+
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+	  <string>cocoapp</string>
+	  <string>https</string>
+	  <string>http</string>
+	</array>
 </dict>
 </plist>
