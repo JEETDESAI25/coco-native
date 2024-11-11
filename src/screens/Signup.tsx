@@ -213,10 +213,8 @@ function SignUpForm(): JSX.Element {
         </NWTouchableHighlight>
       </NWView>
       <NWView className="mt-6 items-center">
-        <NWText className="text-[#A62A72] font-medium mb-2">
-          Or sign up with
-        </NWText>
-        <ThirdPartyLogins onPress={() => {}} />
+        <NWText className="text-[#A62A72] font-medium mb-2">OR</NWText>
+        <ThirdPartyLogins />
         <Terms />
         <PrivacyPolicy />
       </NWView>
