@@ -65,9 +65,24 @@ function LoginForm(): JSX.Element {
       )}
       <Formik
         initialValues={{email: '', password: ''} as Credentials}
-        onSubmit={values => {
+        validate={values => {
+          const errors: Partial<Credentials> = {};
+          if (!values.email) {
+            errors.email = 'Email is required';
+          }
+          if (!values.password) {
+            errors.password = 'Password is required';
+          }
+          return errors;
+        }}
+        onSubmit={(values, {setSubmitting}) => {
           setError(null); // Reset error before making a new request
           if (navigator) {
+            if (!values.email || !values.password) {
+              setError('Email and password are required');
+              setSubmitting(false);
+              return;
+            }
             return login(navigator, authentication, values, setError);
           }
         }}>
@@ -132,10 +147,8 @@ function LoginForm(): JSX.Element {
         </NWTouchableHighlight>
       </NWView>
       <NWView className="mt-6 items-center">
-        <NWText className="text-[#A62A72] font-medium mb-2">
-          Or login with
-        </NWText>
-        <ThirdPartyLogins onPress={() => {}} />
+        <NWText className="text-[#A62A72] font-medium mb-2">OR</NWText>
+        <ThirdPartyLogins />
       </NWView>
     </NWView>
   );
