@@ -3,9 +3,10 @@
  */
 
 import {Buffer} from 'buffer';
-import React from 'react';
+import React, {createContext} from 'react';
 import * as ApiEndpoint from '../constants/ApiEndpoint';
-import {fromEndpointAndParams} from '../helpers/URL';
+// can be used for query params
+// import {fromEndpointAndParams} from '../helpers/URL';
 import {error, Result, result} from '../types/result';
 import {
   badResponse,
@@ -25,13 +26,17 @@ export interface Credentials {
   name: string;
 }
 
-function recordFromCreds(creds: Credentials): Record<string, string> {
-  let result: Record<string, string> = {};
-  result.email = creds.email;
-  result.password = creds.password;
-  result.name = creds.name;
-  return result;
-}
+//Converts Credentials object to a generic key-value record. Can be used for:
+//  Query params - with fromEndpointAndParams for GET requests:
+//     const params = recordFromCreds(creds);
+//     const url = fromEndpointAndParams(ApiEndpoint.someEndpoint, params);
+// function recordFromCreds(creds: Credentials): Record<string, string> {
+//   let record: Record<string, string> = {};
+//   record.email = creds.email;
+//   record.password = creds.password;
+//   record.name = creds.name;
+//   return record;
+// }
 
 interface AuthenticationState {
   user: User | null;
@@ -45,15 +50,17 @@ export interface AuthenticationContext extends AuthenticationState {
   signIn: (args: Credentials) => Promise<Result<User>>;
   signOut: () => Promise<boolean>;
   fetch: FetchSignature;
+  handleGoogleCallback: (data: any) => Promise<Result<User>>;
 }
 
-export const AuthenticationContext = React.createContext({
+export const AuthenticationContext = createContext<AuthenticationContext>({
   user: null,
   token: '',
   signUp: async (_args: Credentials) => error('unimplemented'),
   signIn: async (_args: Credentials) => error('unimplemented'),
   signOut: async () => false,
   fetch: async (_args: FetchArgs) => badResponse(),
+  handleGoogleCallback: async () => error('unimplemented'),
 } as AuthenticationContext);
 
 async function signUp(
@@ -102,8 +109,11 @@ async function signUp(
 
     return result(instance.user as User);
   } catch (err) {
-    console.error('Signup error:', err);
-    return error(`Signup error: ${err.message}`);
+    if (err instanceof Error) {
+      console.error('Signup error:', err);
+      return error(`Signup error: ${err.message}`);
+    }
+    return error('An unknown error occurred during signup');
   }
 }
 
@@ -115,6 +125,10 @@ async function signIn(
 ): Promise<Result<User>> {
   if (instance.token !== '') {
     throw Error('cannot signin when signed in. Log out first!');
+  }
+
+  if (!creds.email || !creds.password) {
+    return error('Email and password are required');
   }
 
   const auth = Buffer.from(creds.email + ':' + creds.password).toString(
@@ -136,11 +150,13 @@ async function signIn(
       },
     });
 
-    console.log('Sign-in response:', netResult); // Log the entire response
-
-    if (!netResult.isOk) {
+    if (
+      !netResult.isOk ||
+      netResult.status === 401 ||
+      netResult.data?.[0] === 'could not verify'
+    ) {
       console.error('Bad signin response:', netResult.status, netResult.data);
-      return error(`Bad signin response: ${netResult.status}`);
+      return error('Invalid email or password');
     }
 
     const payload = netResult.data;
@@ -149,9 +165,13 @@ async function signIn(
       return error('Invalid response payload');
     }
 
-    instance.token = payload.token || '';
+    if (!payload.token || !payload.userid) {
+      return error('Invalid response: missing required fields');
+    }
+
+    instance.token = payload.token;
     instance.user = {
-      userid: payload.userid || '',
+      userid: payload.userid,
     };
     update(instance);
 
@@ -159,8 +179,11 @@ async function signIn(
       userid: instance.user.userid,
     } as User);
   } catch (err) {
-    console.error('Sign-in error:', err);
-    return error(`Sign-in error: ${err.message}`);
+    if (err instanceof Error) {
+      console.error('Sign-in error:', err);
+      return error(`Sign-in error: ${err.message}`);
+    }
+    return error('An unknown error occurred during signin');
   }
 }
 
@@ -214,6 +237,25 @@ export default function AuthenticationProvider(
     token: '',
   } as AuthenticationState);
 
+  const handleGoogleCallback = async (data: any): Promise<Result<User>> => {
+    try {
+      if (!data?.jwt || !data?.record?.userid) {
+        return error('Invalid authentication data received');
+      }
+
+      instance.token = data.jwt;
+      instance.user = {
+        userid: data.record.userid,
+      };
+      update({...instance});
+
+      return result(instance.user);
+    } catch (err) {
+      console.error('Google callback error:', err);
+      return error('Failed to process authentication response');
+    }
+  };
+
   return (
     <AuthenticationContext.Provider
       value={{
@@ -223,6 +265,7 @@ export default function AuthenticationProvider(
         signIn: signIn.bind(null, instance, network, update),
         signOut: signOut.bind(null, instance, network, update),
         fetch: netFetch.bind(null, instance, network, update),
+        handleGoogleCallback,
       }}>
       {children}
     </AuthenticationContext.Provider>
