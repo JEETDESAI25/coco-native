@@ -3,38 +3,79 @@
  */
 
 import React from 'react';
-import {Alert, Linking} from 'react-native';
+import {Linking, Alert} from 'react-native';
 import NWTouchableHighlight from '../primitives/NWTouchableHighlight';
 
-export interface LinkProps {
+interface LinkProps {
   to: string;
-  children: JSX.Element;
+  children: React.ReactNode;
   className?: string;
-}
-
-// Copied from https://reactnative.dev/docs/linking
-async function onPress(url: string) {
-  // Checking if the link is supported for links with custom URL scheme.
-  const supported = await Linking.canOpenURL(url);
-
-  if (supported) {
-    // Opening the link with some app, if the URL scheme is "http" the web link should be opened
-    // by some browser in the mobile
-    await Linking.openURL(url);
-  } else {
-    Alert.alert(`Don't know how to open this URL: ${url}`);
-  }
+  onCallback?: (data: any) => void;
 }
 
 export default function Link({
   to,
   children,
   className,
+  onCallback,
 }: LinkProps): JSX.Element {
-  const onPressHandler = React.useCallback(onPress.bind(null, to), [to]);
+  React.useEffect(() => {
+    if (!onCallback) return;
+
+    const handleInitialURL = async () => {
+      try {
+        const url = await Linking.getInitialURL();
+        console.log('Initial URL:', url);
+        if (url && url.startsWith('cocoapp://oauth/callback')) {
+          handleUrl({url});
+        }
+      } catch (err) {
+        console.error('Error getting initial URL:', err);
+      }
+    };
+
+    const handleUrl = ({url}: {url: string}) => {
+      console.log('Deep link received:', url);
+      if (url.startsWith('cocoapp://oauth/callback')) {
+        try {
+          const urlObj = new URL(url);
+          const data = urlObj.searchParams.get('data');
+          if (data) {
+            const parsedData = JSON.parse(decodeURIComponent(data));
+            console.log('Parsed callback data:', parsedData);
+            onCallback(parsedData);
+          }
+        } catch (err) {
+          console.error('Failed to parse callback URL:', err);
+        }
+      }
+    };
+
+    handleInitialURL();
+    const subscription = Linking.addEventListener('url', handleUrl);
+    return () => subscription.remove();
+  }, [onCallback]);
+
+  const handlePress = async () => {
+    try {
+      const urlWithPlatform = `${to}${
+        to.includes('?') ? '&' : '?'
+      }platform=mobile`;
+      const supported = await Linking.canOpenURL(urlWithPlatform);
+
+      if (supported) {
+        await Linking.openURL(urlWithPlatform);
+      } else {
+        Alert.alert('Error', `Cannot open URL: ${urlWithPlatform}`);
+      }
+    } catch (err) {
+      console.error('Error opening URL:', err);
+      Alert.alert('Error', 'Failed to open authentication page');
+    }
+  };
 
   return (
-    <NWTouchableHighlight className={className || ''} onPress={onPressHandler}>
+    <NWTouchableHighlight className={className} onPress={handlePress}>
       {children}
     </NWTouchableHighlight>
   );
