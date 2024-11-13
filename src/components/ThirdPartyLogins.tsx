@@ -40,7 +40,8 @@ function IconButton(props: IconButtonProps): JSX.Element {
 
   return (
     <NWTouchableHighlight
-      className=" bg-[#A62A72FF] rounded-lg py-2 px-3 "
+      testID="login-button"
+      className="bg-[#A62A72FF] rounded-lg py-2 px-3"
       onPress={() => {
         navigator?.navigate(NavigatorTerms.DUO);
       }}>
