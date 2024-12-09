@@ -17,7 +17,7 @@ const deviceHeight = Dimensions.get('window').height;
 
 export interface SincePickerProps {
   currentSinceOption?: SinceOption;
-  updateSinceOption?: (since: number) => void;
+  updateSinceOption?: (since: SinceOption) => void;
 }
 
 export enum SinceOption {
@@ -59,13 +59,13 @@ export default function SincePicker(props: SincePickerProps): JSX.Element {
   const closeModal = updateIsOpen.bind(null, false);
 
   const highlightClassname =
-    ' w-[80%] py-1 my-2 flex-0 items-center justify-center rounded-lg ';
-  const textClassname = ' text-lg ';
+    'w-[80%] py-3 my-2 flex-0 items-center justify-center rounded-lg';
+  const textClassname = 'text-lg text-white';
 
   const preButton = (
-    <NWView className=" absolute top-0 flex-0 flex-col items-center w-screen ">
+    <NWView className="absolute top-0 flex-0 flex-col items-center w-screen">
       <NWTouchableHighlight
-        className={highlightClassname + ' bg-[#C678A699] '}
+        className={highlightClassname + ' bg-[#A62A72]'}
         onPress={() => updateIsOpen(true)}>
         <NWText className={textClassname}>
           {sinceOptionTitleMap[currentSinceOption]}
@@ -87,49 +87,21 @@ export default function SincePicker(props: SincePickerProps): JSX.Element {
     <>
       {preButton}
       <NWModal
-        animationIn="slideInUp"
+        animationIn="slideInDown"
         animationOut="slideOutUp"
         isVisible={isOpen}
         onBackdropPress={closeModal}
-        hasBackdrop={false}
-        swipeDirection="left"
+        hasBackdrop={true}
+        backdropColor="#000000"
+        backdropOpacity={0.3}
         deviceHeight={deviceHeight}
-        deviceWidth={deviceWidth}
-        animationInTiming={500} // ms
-        animationOutTiming={500} // ms
-        avoidKeyboard={false}
-        coverScreen={false}
-        backdropColor={''}
-        backdropOpacity={0}
-        backdropTransitionInTiming={0}
-        backdropTransitionOutTiming={0}
-        customBackdrop={undefined}
-        useNativeDriver={false}
-        hideModalContentWhileAnimating={false}
-        propagateSwipe={false}
-        panResponderThreshold={0}
-        swipeThreshold={0}
-        onModalShow={() => {}}
-        onModalWillShow={() => {}}
-        onModalHide={closeModal}
-        onModalWillHide={closeModal}
-        onBackButtonPress={() => {}}
-        scrollTo={null}
-        scrollOffset={0}
-        scrollOffsetMax={0}
-        scrollHorizontal={false}
-        statusBarTranslucent={false}
-        supportedOrientations={[]}>
-        <NWView className=" flex-0 flex-col items-center mt-[13%] ">
-          <NWView
-            className={
-              ' w-[90%] flex-0 flex-col items-center justify-between ' +
-              ' bg-[#a9a9a9BB] rounded-lg py-2 '
-            }>
+        deviceWidth={deviceWidth}>
+        <NWView className="flex-0 flex-col items-center mt-[13%]">
+          <NWView className="w-[90%] flex-0 flex-col items-center justify-between bg-white rounded-lg py-2">
             {(getEnumValues(SinceOption) as Array<SinceOption>).map(
               (sinceOption, index) => (
                 <NWTouchableHighlight
-                  className={highlightClassname + ' bg-[#C678A6FF] '}
+                  className={highlightClassname + ' bg-[#A62A72]'}
                   key={index}
                   onPress={() => updateAndClose(sinceOption)}>
                   <NWText className={textClassname}>
