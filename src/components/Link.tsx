@@ -5,6 +5,7 @@
 import React from 'react';
 import {Linking, Alert} from 'react-native';
 import NWTouchableHighlight from '../primitives/NWTouchableHighlight';
+import {parseDeepLinkURL} from '../helpers/URL';
 
 interface LinkProps {
   to: string;
@@ -38,10 +39,9 @@ export default function Link({
       console.log('Deep link received:', url);
       if (url.startsWith('cocoapp://oauth/callback')) {
         try {
-          const urlObj = new URL(url);
-          const data = urlObj.searchParams.get('data');
-          if (data) {
-            const parsedData = JSON.parse(decodeURIComponent(data));
+          const params = parseDeepLinkURL(url);
+          if (params?.data) {
+            const parsedData = JSON.parse(decodeURIComponent(params.data));
             console.log('Parsed callback data:', parsedData);
             onCallback(parsedData);
           }
