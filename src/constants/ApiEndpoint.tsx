@@ -5,3 +5,6 @@ export const login = flaskServerRoot + 'login';
 export const forgot = flaskServerRoot + 'forgot';
 export const reset = flaskServerRoot + 'reset';
 export const googleLogin = flaskServerRoot + 'login/google';
+export const chatProcess = flaskServerRoot + 'coco/api/v1.0/chat_process';
+export const chatConfirm = flaskServerRoot + 'coco/api/v1.0/confirm_chat_food';
+export const getMeals = flaskServerRoot + 'coco/api/v1.0/get_meals';
