@@ -131,29 +131,25 @@ async function signIn(
     return error('Email and password are required');
   }
 
-  const auth = Buffer.from(creds.email + ':' + creds.password).toString(
-    'base64',
-  );
-
   try {
     const netResult: FetchResponse = await netFetch(instance, network, update, {
       resource: ApiEndpoint.login,
       options: {
         method: 'POST',
-        cache: 'no-cache',
         headers: {
-          Authorization: 'Basic ' + auth,
           'Content-Type': 'application/json',
         },
-        redirect: 'follow',
-        referrerPolicy: 'no-referrer',
+        body: JSON.stringify({
+          email: creds.email,
+          password: creds.password,
+        }),
       },
     });
 
     if (
       !netResult.isOk ||
       netResult.status === 401 ||
-      netResult.data?.[0] === 'could not verify'
+      netResult.data?.message === 'could not verify'
     ) {
       console.error('Bad signin response:', netResult.status, netResult.data);
       return error('Invalid email or password');
@@ -165,13 +161,13 @@ async function signIn(
       return error('Invalid response payload');
     }
 
-    if (!payload.token || !payload.userid) {
+    if (!payload.token || !payload.user_id) {
       return error('Invalid response: missing required fields');
     }
 
     instance.token = payload.token;
     instance.user = {
-      userid: payload.userid,
+      userid: payload.user_id,
     };
     update(instance);
 
