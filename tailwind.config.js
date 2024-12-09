@@ -26,6 +26,13 @@ module.exports = {
       borderRadius: {
         '4xl': '2rem',
       },
+      colors: {
+        primary: '#C678A6',
+        secondary: '#A62A72',
+      },
+      boxShadow: {
+        card: '0 2px 4px rgba(0,0,0,0.1)',
+      }
     },
   },
 };
